@@ -1,19 +1,15 @@
 import csv
 import operator
-
+import re
 
 import matplotlib.pylab as plt
-
-from nltk import collections, PorterStemmer
-
-with open('lab1/stop-words.csv', newline='') as csvfile:
-    reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-    stopWord = list(reader)
+from nltk import PorterStemmer
+from nltk.corpus import stopwords
 
 
-def gatheringToSet(list):
+def gathering_to_set(flist):
     res = {}
-    for s in list:
+    for s in flist:
         if s in res:
             res.update({s: res.get(s) + 1})
         else:
@@ -21,71 +17,115 @@ def gatheringToSet(list):
     return sorted(res.items(), key=operator.itemgetter(1), reverse=True)
 
 
-def getFirts20(list):
-    return dict(list[:20])
+def get_first_20(flist):
+    return dict(flist[:20])
 
 
 def isStopWord(word):
-    for sWord in stopWord[0]:
-        if sWord == word:
-            return True
+    if word in stopwords.words('english'):
+        return True
     return False
 
 
-def convertStringToList(string):
+def convertStringToListAndStem(string):
     li = list(string.split(" "))
     res = []
     for l in li:
         l = l.lower()
+        l = porter.stem(l)
         if not isStopWord(l) and len(l) > 0:
             res = res + [l]
     return res
 
 
+def printPlot(map,title):
+    plt.title(title)
+    plt.bar(*zip(*map.items()))
+    plt.show()
+
+def printPlotWithAverege(averege,map,title):
+    plt.title(title)
+    plt.xlabel('length')
+    plt.ylabel('count')
+    plt.bar(*zip(*map.items()),color = "#ff3da2")
+    plt.axvline(averege, color='k', linestyle='dashed', linewidth=1)
+    plt.show()
+
+
 def saveToCsv(map, name):
-    with open('lab1/' + name, 'w') as f:
+    map = dict(map)
+    with open(name, 'w') as f:
         for key in map:
             f.write("%s,%s\n" % (key, map[key]))
 
 
+def deleteSpecialSymbolsFromString(string):
+    string = re.sub('[^a-zA-Z \n]', ' ', string)
+    return convertStringToListAndStem(string)
+
+
+def cleanRow(type, string):
+    if type == "spam":
+        return string[4:]
+    else:
+        return string[3:]
+
+
+def countMessageLenth(mySet, lenth):
+    if lenth in mySet.keys():
+        mySet.update({lenth: mySet.get(lenth) + 1})
+    else:
+        mySet[lenth] = 1
+    return mySet
+
+def getAverege(set):
+    summa = 0
+    count = 0
+    for a in set:
+        summa = summa + a[0] * a[1]
+        count = count + a[1]
+    return summa / (count * 1.0)
+
 with open('lab1/sms-spam-corpus.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     porter = PorterStemmer()
+    wordsSpam = {}
+    messageSpam = {}
+    wordsHum = {}
+    messageHum = {}
     spam = []
-    spamMap = {}
     hum = []
-    specialSymbol = ",.1234567890?`-=\]'><[;/!@#$%^&*()_+|}{|:'\""
     for row in spamreader:
         if row[0] == "spam":
-            for word in row:
-                if len(word) > 0 and word != row[0]:
-                    word = porter.stem(word)
-                    word = word.translate({ord(i): None for i in specialSymbol})
-                    spam = spam + convertStringToList(word)
+            row = cleanRow(row[0], ''.join(row))
+            messageSpam=countMessageLenth(messageSpam,len(row))
+            spam = spam + deleteSpecialSymbolsFromString(row)
+        elif row[0] == "ham":
+            row = cleanRow(row[0], ''.join(row))
+            messageHum = countMessageLenth(messageHum, len(row))
+            hum = hum + deleteSpecialSymbolsFromString(row)
 
-        # else:
-        #     for word in row:
-        #         if len(word) > 0:
-        #             word = word.translate({ord(i): None for i in specialSymbol})
-        #             if (not isStopWord(word)):
-        #                  print(word)
+spamMap = gathering_to_set(spam)
+humMap = gathering_to_set(hum)
 
-    for s in spam:
-        if s in spamMap:
-            spamMap.update({s: spamMap.get(s) + 1})
-        else:
-            spamMap[s] = 1
-    spamMap = sorted(spamMap.items(), key=operator.itemgetter(1), reverse=True)
+for word in spamMap:
+    wordsSpam=countMessageLenth(wordsSpam,len(word[0]))
+for word in humMap:
+    wordsHum = countMessageLenth(wordsHum, len(word[0]))
 
-    print(spamMap)
-    first20Spam = dict(spamMap[:20])
-    print(first20Spam)
-    # x, y = zip(*spamMap)  # unpack a list of pairs into two tuples
-    # plt.plot(x, y)
-    # plt.show()
-    plt.bar(*zip(*first20Spam.items()))
-    plt.show()
-    spamMap = dict(spamMap)
-    with open('lab1/spam.csv', 'w') as f:
-        for key in spamMap:
-            f.write("%s,%s\n" % (key, spamMap[key]))
+wordsSpam=sorted(wordsSpam.items(), key=operator.itemgetter(1), reverse=True)
+wordsHum=sorted(wordsHum.items(), key=operator.itemgetter(1), reverse=True)
+messageSpam=sorted(messageSpam.items(), key=operator.itemgetter(1), reverse=True)
+messageHum=sorted(messageHum.items(), key=operator.itemgetter(1), reverse=True)
+
+printPlot(get_first_20(spamMap), "Spam")
+printPlot(get_first_20(humMap), "Hum")
+
+printPlotWithAverege(getAverege(wordsSpam),dict(wordsSpam),"wordsSpam")
+printPlotWithAverege(getAverege(wordsHum),dict(wordsHum),"wordsHum")
+printPlotWithAverege(getAverege(messageSpam),dict(messageSpam),"messageSpam")
+printPlotWithAverege(getAverege(messageHum),dict(messageHum),"messageHum")
+
+# saveToCsv(spamMap, "spam.csv")
+# saveToCsv(humMap, "hum.cvs")
+
