@@ -86,6 +86,15 @@ def getAverege(set):
         count = count + a[1]
     return summa / (count * 1.0)
 
+def normilize(set):
+    summa = 0
+    for a in set:
+        summa = summa + a[0] * a[1]
+    setN=dict(set)
+    for a in setN:
+        setN.update({a: setN.get(a)/summa})
+    return setN
+
 with open('lab1/sms-spam-corpus.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     porter = PorterStemmer()
@@ -121,11 +130,11 @@ messageHum=sorted(messageHum.items(), key=operator.itemgetter(1), reverse=True)
 printPlot(get_first_20(spamMap), "Spam")
 printPlot(get_first_20(humMap), "Hum")
 
-printPlotWithAverege(getAverege(wordsSpam),dict(wordsSpam),"wordsSpam")
-printPlotWithAverege(getAverege(wordsHum),dict(wordsHum),"wordsHum")
-printPlotWithAverege(getAverege(messageSpam),dict(messageSpam),"messageSpam")
-printPlotWithAverege(getAverege(messageHum),dict(messageHum),"messageHum")
+printPlotWithAverege(getAverege(wordsSpam),normilize(wordsSpam),"wordsSpam")
+printPlotWithAverege(getAverege(wordsHum),normilize(wordsHum),"wordsHum")
+printPlotWithAverege(getAverege(messageSpam),normilize(messageSpam),"messageSpam")
+printPlotWithAverege(getAverege(messageHum),normilize(messageHum),"messageHum")
 
-# saveToCsv(spamMap, "spam.csv")
-# saveToCsv(humMap, "hum.cvs")
+saveToCsv(spamMap, "spam.csv")
+saveToCsv(humMap, "hum.csv")
 
