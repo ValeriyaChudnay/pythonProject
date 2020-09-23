@@ -24,6 +24,22 @@ def convertStringToListAndStem(string):
             res = res + [l]
     return res
 
+def countUnique():
+    uniqueList=[]
+    with open('../lab1/hum.csv', newline='') as csvfile:
+        humreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for h in humreader:
+            if h not in uniqueList:
+                uniqueList.append(h)
+    with open('../lab1/spam.csv', newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for h in spamreader:
+            if h not in uniqueList:
+                uniqueList.append(h)
+    return len(uniqueList)
+
+
+
 
 def deleteSpecialSymbolsFromString(string):
     string = re.sub('[^a-zA-Z \n]', ' ', string)
@@ -43,12 +59,15 @@ def lab2Main():
             spamCount = spamCount + int(h[1])
     messageHumDict = {}
     messageSpamDict = {}
+    spamJustMulti=1;
+    humJustMulti=1;
     spam = 0
     hum = 0
     z = 1;  # коеф размытия
 
     humDictFromFile = {}
     spamDictFromFile = {}
+    uniq=countUnique()
     with open('../lab1/hum.csv', newline='') as csvfile:
         humreader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for f in humreader:
@@ -63,25 +82,30 @@ def lab2Main():
         messageList = deleteSpecialSymbolsFromString(strn)
         for key in messageList:
             if key in humDictFromFile.keys():
-                # messageHumDict.update({key: (int(humDictFromFile.get(key))+z) / (humCount+z*10)})
-                messageHumDict.update({key: math.log((int(humDictFromFile.get(key)) + z) / (humCount + z * 10))})
+                humJustMulti *= (int(humDictFromFile.get(key)) + z) / (humCount + z * uniq)
+                messageHumDict.update({key: math.log((int(humDictFromFile.get(key)) + z) / (humCount + z * uniq))})
             else:
-                # messageHumDict.update({key: z/(humCount+z*10)})
-                messageHumDict.update({key: math.log(z / (humCount + z * 10))})
+                humJustMulti *=z / (humCount + z * uniq)
+                messageHumDict.update({key: math.log(z / (humCount + z * uniq))})
         for key in messageList:
             if key in spamDictFromFile.keys():
-                # messageSpamDict.update({key: (int(spamDictFromFile.get(key)) + z) / (spamCount+z*10)})
-                messageSpamDict.update({key: math.log((int(spamDictFromFile.get(key)) + z) / (spamCount + z * 10))})
+                spamJustMulti *= (int(spamDictFromFile.get(key)) + z) / (spamCount + z * uniq)
+                messageSpamDict.update({key: math.log((int(spamDictFromFile.get(key)) + z) / (spamCount + z * uniq))})
             else:
-                # messageSpamDict.update({key: z / (spamCount+z*10)})
-                messageSpamDict.update({key: math.log(z / (spamCount + z * 10))})
+                spamJustMulti *= z / (spamCount + z * uniq)
+                messageSpamDict.update({key: math.log(z / (spamCount + z * uniq))})
+        hum=hum+math.log(humCount/(humCount+spamCount))
+        spam = spam + math.log(spamCount / (humCount + spamCount))
+        humJustMulti*=humCount/(humCount+spamCount)
+        spamJustMulti*=spamCount/(humCount+spamCount)
+        print("Hum multi=",humJustMulti)
+        print("spam multi=",spamJustMulti)
         for h in messageHumDict.values():
             hum = hum + h
         for h in messageSpamDict.values():
             spam = spam + h
-        # print("Hum:= ", hum)
-        # print("Spam=", spam)
-        # print(hum / (hum + spam))
+        print(spam)
+        print(hum)
         if (hum / (hum + spam) < 0.50):  # от 0 до 0.55 скорее хам, от 0.55 до 1 спам
             print("It's hum, good")
         else:
