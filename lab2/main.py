@@ -100,6 +100,10 @@ def lab2Main():
         spamJustMulti*=spamCount/(humCount+spamCount)
         print("Hum multi=",humJustMulti)
         print("spam multi=",spamJustMulti)
+        humJustMulti=1;
+        spamJustMulti=1;
+        messageHumDict={}
+        messageSpamDict={}
         for h in messageHumDict.values():
             hum = hum + h
         for h in messageSpamDict.values():
