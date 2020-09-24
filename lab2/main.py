@@ -77,6 +77,12 @@ def lab2Main():
         for f in spamreader:
             spamDictFromFile[f[0]] = f[1]
     while (True):
+        messageHumDict = {}
+        messageSpamDict = {}
+        spamJustMulti = 1;
+        humJustMulti = 1;
+        spam = 0
+        hum = 0
         print("Enter message")
         strn = str(input())
         messageList = deleteSpecialSymbolsFromString(strn)
@@ -100,10 +106,6 @@ def lab2Main():
         spamJustMulti*=spamCount/(humCount+spamCount)
         print("Hum multi=",humJustMulti)
         print("spam multi=",spamJustMulti)
-        humJustMulti=1;
-        spamJustMulti=1;
-        messageHumDict={}
-        messageSpamDict={}
         for h in messageHumDict.values():
             hum = hum + h
         for h in messageSpamDict.values():
@@ -114,6 +116,7 @@ def lab2Main():
             print("It's hum, good")
         else:
             print("It's SPAM, NOOOOOO")
+
 
 
 lab2Main()
