@@ -40,7 +40,7 @@ def convertStringToListAndStem(string):
 
 def printPlot(map,title):
     plt.title(title)
-    plt.bar(*zip(*map.items()))
+    plt.bar(*zip(*map.items()),color=c)
     plt.show()
 
 def printPlotWithAverege(averege,map,title):

@@ -59,7 +59,7 @@ def lab2Main():
             spamCount = spamCount + int(h[1])
     messageHumDict = {}
     messageSpamDict = {}
-    spamJustMulti=1;
+    spamJustMulti=1
     humJustMulti=1;
     spam = 0
     hum = 0
@@ -110,8 +110,7 @@ def lab2Main():
             hum = hum + h
         for h in messageSpamDict.values():
             spam = spam + h
-        print(spam)
-        print(hum)
+
         if (hum / (hum + spam) < 0.50):  # от 0 до 0.55 скорее хам, от 0.55 до 1 спам
             print("It's hum, good")
         else:
