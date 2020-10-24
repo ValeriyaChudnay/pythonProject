@@ -16,7 +16,7 @@ import requests
 # https://www.craftcoffee.com/ do 30
 # https://www.gogoro.com/ do 50 c кучей на концах
 # http://stephencaver.com/ do 15
-url = "http://stephencaver.com/"
+url = "https://www.craftcoffee.com/"
 badExtentions=['.digital','.hash','.eps','.ppt','.pptx','.pdf','.jpeg','.jpg','.png','.gif','.rar','._gromad','.doc','.txt','.xls','.xml','.zip']
 d=0.5
 E=0.001
@@ -39,6 +39,8 @@ def validation(href,mHref,internalLink):
         if i in href:
             return False
     if '#' in href:
+        return False
+    if '?' in href:
         return False
     if href == mHref:
         return False
@@ -98,7 +100,7 @@ def printGraf():
     page = requests.get(url)
     data = page.text
     soup = BeautifulSoup(data, "html.parser")
-    for link in soup.find_all('a',href=re.compile('^(/)' )):  #this for /j/j/j/j
+    for link in soup.find_all('a',href=re.compile('^(/)' )):
         href = link.get('href')
         print(url+href)
     allSoup=soup.find_all('a',href=re.compile('http[s]{0,1}.'+urlCut+'*\.html'))
@@ -169,10 +171,8 @@ recursion(url)
 nx.draw(G,with_labels=True)
 plt.show()
 print(dictNumToLink)
-print( sorted(dictNumToCountOfLink.items(), key=operator.itemgetter(1)))
 B = [[0 for x in range(len(G.nodes)+1)] for y in range(len(G.nodes))]
 for n in G.edges:
-    print(n[0],"-->",n[1])
     B[n[1]][n[0]] = d / dictNumToCountOfLink[n[0]]
 print(len(G.nodes))
 for i in range(0, len(G.nodes)):
